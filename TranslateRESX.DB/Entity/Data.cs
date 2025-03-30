@@ -13,6 +13,8 @@ namespace TranslateRESX.DB.Entity
 
         public DateTime DateTime { get; set; }
 
+        public string DictinaryKey { get; set; }
+
         public string ApiKey { get; set; }
 
         public int StatusCode { get; set; }

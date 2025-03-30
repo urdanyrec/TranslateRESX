@@ -11,4 +11,8 @@
     <PackageReference Include="Caliburn.Micro" Version="4.0.230" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\TranslateRESX.DB\TranslateRESX.DB.csproj" />
+  </ItemGroup>
+
 </Project>
