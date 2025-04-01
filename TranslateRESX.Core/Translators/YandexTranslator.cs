@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using TranslateRESX.Core.Helpers;
 
@@ -17,6 +18,7 @@ namespace TranslateRESX.Core.Translators
             ApiKey = apiKey;
             DestinationLanguage = targetLanguage;
             _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
         }
 
         public async Task<TranslateTaskResult> TranslateTextAsync(string text, string sourceLanguage)
@@ -33,20 +35,23 @@ namespace TranslateRESX.Core.Translators
                 folderId = ""
             };
             string requestJson = JsonSerializer.Serialize(requestData);
-            var content = new StringContent(requestJson, Encoding.UTF8, "application/json");
-            string url = $"https://translate.api.cloud.yandex.net/translate/v2/translate?key={ApiKey}";
 
-            var response = await _httpClient.PostAsync(url, content);
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.Method = HttpMethod.Post;
+            request.RequestUri = new Uri("https://translate.api.cloud.yandex.net/translate/v2/translate");
+            request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
+
+            var response = await _httpClient.SendAsync(request);
             taskResult.Request = requestJson;
             taskResult.StatusCode = (int)response.StatusCode;
             if (response.IsSuccessStatusCode)
             {
                 string responseJson = await response.Content.ReadAsStringAsync();
                 using JsonDocument doc = JsonDocument.Parse(responseJson);
-                var translatedText = doc.RootElement
-                    .GetProperty("translations")[0]
-                    .GetProperty("text")
-                    .GetString();
+                var translatedText = doc.RootElement.GetProperty("translations")[0]
+                                                    .GetProperty("text")
+                                                    .GetString();
       
                 taskResult.Answer = responseJson;
                 taskResult.TranslatedPhrase = translatedText;

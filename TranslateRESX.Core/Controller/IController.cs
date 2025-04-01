@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TranslateRESX.DB;
+﻿using TranslateRESX.DB;
+using TranslateRESX.Domain.Models;
 
 namespace TranslateRESX.Core.Controller
 {
     public interface IController
     {
-        Task Start(object parameters, IContainer dbContainer, CancellationToken cancellationToken);
+        CancellationTokenSource CancellationTokenSource { get; }
+        Task Start(IParametersModel parameters, IContainer dbContainer, IState state, CancellationToken cancellationToken);
+        event EventHandler Finished;
+        event EventHandler Started;
     }
 }

@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranslateRESX.DB", "Transla
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranslateRESX.Core", "TranslateRESX.Core\TranslateRESX.Core.csproj", "{74A25378-3F81-4DE3-8A5F-F02700AF81C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranslateRESX.Domain", "TranslateRESX.Domain\TranslateRESX.Domain.csproj", "{A838B613-14F5-4B61-814E-9C684F40873D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranslateRESX.Test", "TranslateRESX.Test\TranslateRESX.Test.csproj", "{8092D535-739C-4156-98FD-BD8FA3E46887}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{74A25378-3F81-4DE3-8A5F-F02700AF81C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74A25378-3F81-4DE3-8A5F-F02700AF81C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74A25378-3F81-4DE3-8A5F-F02700AF81C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A838B613-14F5-4B61-814E-9C684F40873D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A838B613-14F5-4B61-814E-9C684F40873D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A838B613-14F5-4B61-814E-9C684F40873D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A838B613-14F5-4B61-814E-9C684F40873D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8092D535-739C-4156-98FD-BD8FA3E46887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8092D535-739C-4156-98FD-BD8FA3E46887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8092D535-739C-4156-98FD-BD8FA3E46887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8092D535-739C-4156-98FD-BD8FA3E46887}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
