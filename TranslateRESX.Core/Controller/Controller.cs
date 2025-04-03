@@ -1,20 +1,27 @@
 ﻿using TranslateRESX.DB;
 using TranslateRESX.Domain.Models;
 using TranslateRESX.Domain.Enums;
-using TranslateRESX.Domain.Helpers;
 using TranslateRESX.Core.Translators;
 using System.Collections;
-using System.Resources.Extensions;
 using TranslateRESX.Core.Helpers;
+using TranslateRESX.DB.Entity;
+using System.Threading;
+using System;
+using System.Threading.Tasks;
+using System.IO;
+using System.Collections.Generic;
+using System.Resources;
+using System.ComponentModel.Design;
+using System.Diagnostics;
+using TranslateRESX.Core.Events;
 
 namespace TranslateRESX.Core.Controller
 {
     public class Controller : IController
     {
-        public CancellationTokenSource CancellationTokenSource { get; }
+        public CancellationTokenSource CancellationTokenSource { get; set; }
 
-        public event EventHandler Finished;
-        public event EventHandler Started;
+        public event EventHandler<StateChangedEventArgs> StateChanged;
 
         private string _pathToBackup;
 
@@ -24,47 +31,88 @@ namespace TranslateRESX.Core.Controller
             _pathToBackup = pathToBackup;
         }
 
-
-        public Task Start(IParametersModel parameters, IContainer dbContainer, IState state, CancellationToken cancellationToken)
+        public Task Start(IParametersModel parameters, IContainer dbContainer)
         {
             if (parameters == null)
                 throw new NullReferenceException();
 
             return Task.Factory.StartNew(() => 
             {
+                var state = new StateModel();
                 state.State = StateType.NotRunning;
+                OnStateChanged(state);
+
+                // Создание бекапа файлов
+                string backupPath = Path.Combine(_pathToBackup, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+                Directory.CreateDirectory(backupPath);
+                File.Copy(parameters.SourceFilename, Path.Combine(backupPath, Path.GetFileName(parameters.SourceFilename)));
+                bool targetFileExists = File.Exists(parameters.TargetFilename);
+                if (targetFileExists)
+                    File.Copy(parameters.TargetFilename, Path.Combine(backupPath, Path.GetFileName(parameters.TargetFilename)));
+
+                // Словарь для хранения существующих переводов (если файл есть)
+                var existingResources = new Dictionary<string, object>();
+                if (targetFileExists)
+                {
+                    try
+                    {
+                        using (ResXResourceReader reader = new ResXResourceReader(parameters.TargetFilename))
+                        {
+                            reader.UseResXDataNodes = true;
+                            foreach (DictionaryEntry entry in reader)
+                            {
+                                if (entry.Value is string value)
+                                {
+                                    existingResources[entry.Key.ToString()] = value;
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        File.Delete(parameters.TargetFilename);
+                        targetFileExists = false;
+                    }
+                }
+
+                // Ключи для перевода
+                var resourcesToTranslate = new List<ResXDataNode>();
+                var otherResources = new List<ResXDataNode>();
+                using (ResXResourceReader reader = new ResXResourceReader(parameters.SourceFilename))
+                {
+                    reader.UseResXDataNodes = true;
+                    foreach (DictionaryEntry entry in reader)
+                    {
+                        var node = (ResXDataNode)entry.Value;
+                        if (node.GetValue((ITypeResolutionService)null) is string text)
+                        {
+                            if (!targetFileExists || !existingResources.ContainsKey(node.Name))
+                            {
+                                resourcesToTranslate.Add(node);
+                            }
+                        }
+                        else if (!existingResources.ContainsKey(node.Name))
+                        {
+                            otherResources.Add(node);
+                        }
+                    }
+                }
+
                 try
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        cancellationToken.ThrowIfCancellationRequested();
+                    if (CancellationTokenSource.Token.IsCancellationRequested)
+                        CancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                    if (resourcesToTranslate.Count == 0)
+                        throw new Exception("Отсутствуют уникальный ключи в файле ресурсов");
 
                     state.State = StateType.Processing;
+                    state.Log = "";
+                    state.AllCount = resourcesToTranslate.Count;
+                    OnStateChanged(state);
 
-                    string filename = Path.GetFileNameWithoutExtension(parameters.SourceFilename);
-                    string directory = Path.GetDirectoryName(parameters.SourceFilename);
-                    string extension = Path.GetExtension(parameters.SourceFilename);
-
-                    string sourceLanguage = LanguageHelper.LanguageDictionary[parameters.SourceLanguage];
-                    string targetLanguage = LanguageHelper.LanguageDictionary[parameters.TargetLanguage];
-
-                    // Создание бекапа файлов
-                    string backupPath = Path.Combine(_pathToBackup, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-                    Directory.CreateDirectory(backupPath);
-                    File.Copy(filename, Path.Combine(backupPath, Path.GetFileName(filename)));
-
-
-                    var langMatch = System.Text.RegularExpressions.Regex.Match(Path.GetFileNameWithoutExtension(filename), @"\.([a-z]{2,3})$");
-                    string targetFilename;
-                    if (langMatch.Success)
-                    {
-                        // Замена существующего языкового кода
-                        targetFilename = Path.Combine(directory, filename.Substring(0, langMatch.Index) + $".{targetLanguage}" + extension);
-                    }
-                    else
-                    {
-                        // Добавление нового языкового кода
-                        targetFilename = Path.Combine(directory, filename + $".{targetLanguage}" + extension);
-                    }
+                    string sourceLanguage = ResourceExtentions.LanguageDictionary[parameters.SourceLanguage].Item2;
+                    string targetLanguage = ResourceExtentions.LanguageDictionary[parameters.TargetLanguage].Item2;
 
                     // Выбор сервиса для перевода
                     ITranslator translator = null;
@@ -73,52 +121,87 @@ namespace TranslateRESX.Core.Controller
                         case LanguageService.Yandex:
                             translator = new YandexTranslator(parameters.ApiKey, targetLanguage);
                             break;
+                        default:
+                            translator = new Emulator(parameters.ApiKey, targetLanguage);
+                            break;
                     }
 
-                    using (DeserializingResourceReader reader = new DeserializingResourceReader(filename))
-                    using (PreserializedResourceWriter writer = new PreserializedResourceWriter(targetFilename))
+                    using (ResXResourceWriter writer = new ResXResourceWriter(parameters.TargetFilename))
                     {
-                        foreach (DictionaryEntry entry in reader)
+                        // Записываем существующие переводы и другие ресурсы
+                        foreach (var existing in existingResources)
                         {
-                            if (entry.Value is string text)
+                            writer.AddResource(existing.Key, existing.Value);
+                        }
+                        foreach (var resource in otherResources)
+                        {
+                            writer.AddResource(resource);
+                        }
+
+
+                        // Добавляем новые переводы
+                        for (int i = 0; i < resourcesToTranslate.Count; i++)
+                        {
+                            if (CancellationTokenSource.Token.IsCancellationRequested)
+                                CancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                            string text = resourcesToTranslate[i].GetValue((ITypeResolutionService)null) as string;
+                            string translatedText = "";
+                            Task<TranslateTaskResult> result = translator.TranslateTextAsync(text, sourceLanguage);
+                            result.Wait();
+                            if (result.Result.StatusCode == 200)
                             {
-                                Task<TranslateTaskResult> result = translator.TranslateTextAsync(text, sourceLanguage);
-                                result.Wait();
-                                if (result.Result.StatusCode == 200)
-                                {
-                                    string translatedText = result.Result.TranslatedPhrase;
-                                    writer.AddResource(entry.Key.ToString(), translatedText);
-                                }
+                                translatedText = result.Result.TranslatedPhrase;
+                                var newNode = new ResXDataNode(resourcesToTranslate[i].Name, translatedText);
+                                writer.AddResource(newNode);
                             }
-                            else
+
+                            // Обновление лога
+                            state.Log += $"{DateTime.Now}. Время ожидания: {result.Result.WaitTime} мс. Статус: {result.Result.StatusCode}. Перевод: {sourceLanguage}-{targetLanguage}. Результат: {result.Result.TranslatedPhrase}" + "\n";
+                            state.CurrentIndex = i;
+                            state.Progress = 100.0 * (double)state.CurrentIndex / state.AllCount;
+                            OnStateChanged(state);
+                            Debug.WriteLine(state.Progress);
+                            // Сохранение в БД
+                            var dataEntity = new Data
                             {
-                                writer.AddResource(entry.Key.ToString(), entry.Value);
-                            }
+                                Service = parameters.Service.GetDescription(),
+                                DateTime = DateTime.Now,
+                                DictinaryKey = resourcesToTranslate[i].Name,
+                                ApiKey = parameters.ApiKey,
+                                StatusCode = result.Result.StatusCode,
+                                WaitTime = (int)result.Result.WaitTime,
+                                RequestString = result.Result.Request,
+                                AnswerString = result.Result.Answer,
+                                SourceLanguage = sourceLanguage,
+                                TargetLanguage = targetLanguage,
+                                SourcePhrase = text,
+                                TranslatedPhrase = translatedText
+                            };
+                            dbContainer.Results.Add(dataEntity);
+                            dbContainer.Complete();
                         }
                     }
                 }
                 catch (OperationCanceledException)
                 {
                     state.State = StateType.Canceled;
+                    OnStateChanged(state);
                     throw;
                 }
                 catch (Exception ex)
                 {
                     state.State = StateType.Error;
+                    OnStateChanged(state);
                     throw ex;
                 }
-
-            }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        protected virtual void OnStarted()
+        protected virtual void OnStateChanged(IState state)
         {
-            Started?.Invoke(this, EventArgs.Empty);
-        }
-
-        protected virtual void OnFinished()
-        {
-            Finished?.Invoke(this, EventArgs.Empty);
+            var eventArgs = new StateChangedEventArgs(state);
+            StateChanged?.Invoke(this, eventArgs);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -28,7 +29,13 @@ namespace TranslateRESX.DB.Repository
 
         public IEnumerable<Data> GetByDestinationLanguage(string destinationLanguage)
         {
-            return MainContext.Results.Where(m => m.DestinationLanguage == destinationLanguage).OrderByDescending(m => m.Id);
+            return MainContext.Results.Where(m => m.TargetLanguage == destinationLanguage).OrderByDescending(m => m.Id);
+        }
+
+        public IEnumerable<Data> GetUniqueApiKeys()
+        {
+            var datas = MainContext.Results.ToList();
+            return datas.GroupBy(m => m.ApiKey).Select(g => g.First()).ToList();
         }
     }
 }

@@ -2,11 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using TranslateRESX.ApiHistory;
+using TranslateRESX.Core.Controller;
 using TranslateRESX.DB;
+using TranslateRESX.Domain.Models;
+using TranslateRESX.Helpers;
+using TranslateRESX.Main;
+using TranslateRESX.TranslateParameters;
+using TranslateRESX.TranslateState;
 
 namespace TranslateRESX
 {
@@ -22,8 +30,21 @@ namespace TranslateRESX
         protected override void Configure()
         {
             _container = new SimpleContainer();
+            _container.Singleton<IWindowManager, CustomWindowManager>();
             _container.Singleton<IEventAggregator, EventAggregator>();
-            _container.RegisterPerRequest(typeof(IContainer), "Db", typeof(Container));
+            _container.Singleton<ITranslateParametersView, TranslateParametersViewModel>();
+            _container.Singleton<ITranslateStateView, TranslateStateViewModel>();
+            _container.Singleton<IMainView, MainViewModel>();
+            _container.Singleton<IApiHistoryView, ApiHistoryViewModel>();
+
+            var config = new VisualConfig();
+            _container.RegisterInstance(typeof(IVisualConfig), "Config", config);
+
+            var container = new Container();
+            _container.RegisterInstance(typeof(IContainer), "Db", container);       
+
+            var controller = new Controller(container.DatabaseDirectory);
+            _container.RegisterInstance(typeof(IController), "Controller", controller);
         }
         protected override object GetInstance(Type service, string key)
         {
@@ -44,20 +65,36 @@ namespace TranslateRESX
             _container.BuildUp(instance);
         }
 
-        protected override void OnStartup(object sender, System.Windows.StartupEventArgs e)
+        protected override void OnStartup(object sender, StartupEventArgs e)
         {
             Process proc = Process.GetCurrentProcess();
             int count = Process.GetProcesses().Count(p => p.ProcessName == proc.ProcessName);
             if (count > 1)
             {
-                //MessageBox.Show(Strings.ResourceManager.GetString("StringProgramIsRunning", LanguageManager.CurrentCulture));
+                MessageBox.Show("Программа уже запущена");
                 Environment.Exit(-1);
-            }      
+            }
+
+            var configVisual = IoC.Get<IVisualConfig>();
+            try
+            {
+                configVisual.Read();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            DisplayRootViewFor<IMainView>();
         }
 
         protected override void OnExit(object sender, EventArgs e)
         {
-            
+            var configVisual = IoC.Get<IVisualConfig>();
+            configVisual.Write();
+
+            var container = IoC.Get<IContainer>();
+            container.Dispose();
         }
 
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

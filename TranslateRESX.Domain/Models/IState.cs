@@ -5,6 +5,9 @@ namespace TranslateRESX.Domain.Models
 {
     public interface IState
     {
+        /// <summary>
+        /// Состояние
+        /// </summary>
         StateType State { get; set; }
 
         /// <summary>
@@ -16,6 +19,11 @@ namespace TranslateRESX.Domain.Models
         /// Количество ключей в словаре
         /// </summary>
         int AllCount { get; set; }
+
+        /// <summary>
+        /// [Количество ключей]/[текущий индекс]*100
+        /// </summary>
+        double Progress { get; set; }
 
         /// <summary>
         /// Лог выполнения

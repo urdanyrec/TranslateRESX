@@ -1,0 +1,47 @@
+﻿<Window x:Class="TranslateRESX.Main.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TranslateRESX.Main" 
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:domain="clr-namespace:TranslateRESX.Domain.Enums;assembly=TranslateRESX.Domain"
+        xmlns:cal="http://www.caliburnproject.org"
+        mc:Ignorable="d"
+        Title="Переводчик ресурсов" 
+        Height="600" 
+        Width="1000"
+        cal:Bind.AtDesignTime="True"
+        cal:Message.Attach="[Event Loaded]=[Action LoadedCommand()];[Event Closed]=[Action ClosedCommand()]"
+        d:DataContext="{d:DesignInstance Type=local:MainViewModel, IsDesignTimeCreatable=True}" 
+        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <ContentControl
+            Grid.Row="0"
+            HorizontalContentAlignment="Stretch"    
+            VerticalContentAlignment="Stretch"
+            cal:View.Model="{Binding TranslateParametersView}" />
+        <ContentControl
+            Grid.Row="1"
+            HorizontalContentAlignment="Stretch"    
+            VerticalContentAlignment="Stretch"
+            cal:View.Model="{Binding TranslateStateView}" />
+        <Grid 
+            Background="#F0F0F0"
+            Grid.Row="2">
+            <Button             
+                Height="30"
+                Width="100"
+                Content="Старт"
+                HorizontalAlignment="Right"
+                Margin="5"
+                cal:Message.Attach="[Event Click]=[Action StartCommand()]"/>
+        </Grid>
+    </Grid>
+    
+</Window>

@@ -1,4 +1,5 @@
-﻿using TranslateRESX.DB.Entity;
+﻿using System.Collections.Generic;
+using TranslateRESX.DB.Entity;
 
 namespace TranslateRESX.DB.Repository
 {
@@ -9,5 +10,7 @@ namespace TranslateRESX.DB.Repository
         IEnumerable<Data> GetBySourceLanguage(string sourceLanguage);
 
         IEnumerable<Data> GetByDestinationLanguage(string destinationLanguage);
+
+        IEnumerable<Data> GetUniqueApiKeys();
     }
 }

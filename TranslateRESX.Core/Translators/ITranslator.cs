@@ -1,4 +1,5 @@
-﻿using TranslateRESX.Core.Helpers;
+﻿using System.Threading.Tasks;
+using TranslateRESX.Core.Helpers;
 
 namespace TranslateRESX.Core.Translators
 {

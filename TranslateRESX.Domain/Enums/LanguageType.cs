@@ -13,6 +13,12 @@ namespace TranslateRESX.Domain.Enums
         Russian,
 
         [Description("English")]
-        English
+        English,
+
+        [Description("Francais")]
+        French,
+
+        [Description("Espagnol")]
+        Spanish
     }
 }

@@ -11,6 +11,8 @@ namespace TranslateRESX.DB.Entity
     {
         public int Id { get; set; }
 
+        public string Service { get; set; }
+
         public DateTime DateTime { get; set; }
 
         public string DictinaryKey { get; set; }
@@ -19,16 +21,18 @@ namespace TranslateRESX.DB.Entity
 
         public int StatusCode { get; set; }
 
+        public int WaitTime { get; set; }
+
         public string RequestString { get; set; }
 
         public string AnswerString { get; set; }
 
         public string SourceLanguage { get; set; }
 
-        public string DestinationLanguage { get; set; }
+        public string TargetLanguage { get; set; }
 
         public string SourcePhrase { get; set; }
 
-        public string DestinationPhrase { get; set; }
+        public string TranslatedPhrase { get; set; }
     }
 }

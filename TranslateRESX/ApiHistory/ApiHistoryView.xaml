@@ -1,0 +1,75 @@
+﻿<Window x:Class="TranslateRESX.ApiHistory.ApiHistoryView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:local="clr-namespace:TranslateRESX.ApiHistory"
+        xmlns:converters="clr-namespace:TranslateRESX.Converters"
+        mc:Ignorable="d"
+        Title="История API ключей"
+        Height="160" 
+        Width="410"
+        cal:Bind.AtDesignTime="True"
+        cal:Message.Attach="[Event Loaded]=[Action LoadedCommand($view)];"
+        d:DataContext="{d:DesignInstance Type=local:ApiHistoryViewModel, IsDesignTimeCreatable=True}" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <converters:ConcatPropertyConverter x:Key="ConcatPropertyConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <TextBlock
+                Margin="15,10,0,10"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Text="Выберите нужный API ключ из базы данных"
+                TextWrapping="Wrap" />
+            <ComboBox
+                Grid.Row="1"
+                Grid.Column="0"
+                Margin="15,5,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                ItemsSource="{Binding Items}"
+                SelectedItem="{Binding SelectedApiKey}"
+                Width="370">
+                <ComboBox.ItemTemplate>
+                <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource ConcatPropertyConverter}, ConverterParameter='Service,ApiKey'}"/>
+                </DataTemplate>
+                </ComboBox.ItemTemplate> 
+            </ComboBox>
+        </Grid>
+        <Grid Grid.Row="1" Background="#F0F0F0">
+            <StackPanel
+                Margin="0,8,8,8"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <Button IsDefault="True"
+                    Width="80"
+                    Height="30"
+                    Content="Ок"
+                    cal:Message.Attach="[Event Click]=[Action OkCommand()]">
+                </Button>
+                <Button IsDefault="True"
+                    Margin="15,0,0,0"
+                    Width="80"
+                    Height="30"
+                    Content="Отмена"
+                    cal:Message.Attach="[Event Click]=[Action CancelCommand()]">
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

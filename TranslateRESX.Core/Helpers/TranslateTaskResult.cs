@@ -10,6 +10,8 @@ namespace TranslateRESX.Core.Helpers
     {
         public int StatusCode { get; set; }
 
+        public long WaitTime { get; set; }
+
         public string Request { get; set; }
 
         public string Answer { get; set; }

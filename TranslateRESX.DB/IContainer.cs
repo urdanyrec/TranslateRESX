@@ -1,4 +1,5 @@
-﻿using TranslateRESX.DB.Repository;
+﻿using System;
+using TranslateRESX.DB.Repository;
 
 namespace TranslateRESX.DB
 {
@@ -7,6 +8,8 @@ namespace TranslateRESX.DB
         IVersionRepository Versions { get; }
 
         IDataRepository Results { get; }
+
+        string DatabaseDirectory { get; }
 
         int Complete();
     }

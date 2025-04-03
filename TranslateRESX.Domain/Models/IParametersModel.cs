@@ -20,6 +20,11 @@ namespace TranslateRESX.Domain.Models
         string SourceFilename { get; set; }
 
         /// <summary>
+        /// Путь к новому файлу ресурсов
+        /// </summary>
+        string TargetFilename { get; }
+
+        /// <summary>
         /// Исходный язык файла ресурсов
         /// </summary>
         LanguageType SourceLanguage { get; set; }

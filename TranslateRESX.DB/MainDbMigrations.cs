@@ -10,7 +10,7 @@ namespace TranslateRESX.DB
 {
     public static class MainDbMigrations
     {
-        private static readonly int _requiredDatabaseVersion = 1;
+        private static readonly int _requiredDatabaseVersion = 2;
 
         public static void Migration(Container container, MainDbContext dbContext)
         {

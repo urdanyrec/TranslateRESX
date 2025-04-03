@@ -1,10 +1,17 @@
-﻿using System.Net.Http.Headers;
+﻿using System;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using TranslateRESX.Core.Helpers;
 
 namespace TranslateRESX.Core.Translators
 {
+    /// <summary>
+    /// Сервис перевода через Yandex API
+    /// </summary>
     public class YandexTranslator : ITranslator
     {
         public string ApiKey { get; }
@@ -40,15 +47,19 @@ namespace TranslateRESX.Core.Translators
             request.Method = HttpMethod.Post;
             request.RequestUri = new Uri("https://translate.api.cloud.yandex.net/translate/v2/translate");
             request.Content = new StringContent(requestJson, Encoding.UTF8, "application/json");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Api-Key", ApiKey);
 
+            var stopwatch = Stopwatch.StartNew();
             var response = await _httpClient.SendAsync(request);
+            stopwatch.Stop();
+
+            taskResult.WaitTime = stopwatch.ElapsedMilliseconds;
             taskResult.Request = requestJson;
             taskResult.StatusCode = (int)response.StatusCode;
             if (response.IsSuccessStatusCode)
             {
                 string responseJson = await response.Content.ReadAsStringAsync();
-                using JsonDocument doc = JsonDocument.Parse(responseJson);
+                JsonDocument doc = JsonDocument.Parse(responseJson);
                 var translatedText = doc.RootElement.GetProperty("translations")[0]
                                                     .GetProperty("text")
                                                     .GetString();

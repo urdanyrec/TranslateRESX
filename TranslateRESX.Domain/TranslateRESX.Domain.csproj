@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A838B613-14F5-4B61-814E-9C684F40873D}</ProjectGuid>
+    <ProjectGuid>{75146ED9-3979-48CC-B3D4-18061B030699}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TranslateRESX.Domain</RootNamespace>
@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,15 +44,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Enums\StateType.cs" />
     <Compile Include="Enums\LanguageService.cs" />
-    <Compile Include="Enums\SaveOption.cs" />
     <Compile Include="Enums\LanguageType.cs" />
-    <Compile Include="Helpers\LanguageHelper.cs" />
-    <Compile Include="Models\IState.cs" />
+    <Compile Include="Enums\StateType.cs" />
+    <Compile Include="Models\ApiKeyModel.cs" />
+    <Compile Include="Models\IConfig.cs" />
     <Compile Include="Models\IParametersModel.cs" />
+    <Compile Include="Models\IVisualConfig.cs" />
+    <Compile Include="Models\IState.cs" />
     <Compile Include="Models\ParametersModel.cs" />
+    <Compile Include="Models\StateModel.cs" />
+    <Compile Include="Models\VisualConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

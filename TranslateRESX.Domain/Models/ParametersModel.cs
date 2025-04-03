@@ -10,6 +10,8 @@ namespace TranslateRESX.Domain.Models
 
         public string SourceFilename { get; set; }
 
+        public string TargetFilename { get; set; }
+
         public LanguageType SourceLanguage { get; set; }
 
         public LanguageType TargetLanguage { get; set; }
