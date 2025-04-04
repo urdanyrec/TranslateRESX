@@ -13,7 +13,8 @@
         cal:Bind.AtDesignTime="True"
         d:DataContext="{d:DesignInstance Type=local:DialogViewModel, IsDesignTimeCreatable=True}"
         ResizeMode="NoResize" 
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Title="{Binding Title}">
     <Window.Resources>
         <ResourceDictionary>
             <converters:BoldTextMultiConverter x:Key="BoldTextMultiConverter" />

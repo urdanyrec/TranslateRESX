@@ -123,6 +123,7 @@
     <Compile Include="Helpers\ResourceExtentions.cs" />
     <Compile Include="Helpers\TranslateTaskResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Translators\DeepLTranslator.cs" />
     <Compile Include="Translators\Emulator.cs" />
     <Compile Include="Translators\GoogleTranslator.cs" />
     <Compile Include="Translators\ITranslator.cs" />

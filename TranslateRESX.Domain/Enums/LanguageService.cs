@@ -7,10 +7,13 @@ namespace TranslateRESX.Domain.Enums
         [Description("Яндекс")]
         Yandex,
 
-        [Description("Эмулятор")]
-        Emulator,
-
         [Description("Google")]
         Google,
+
+        [Description("DeepL")]
+        DeepL,
+
+        [Description("Эмулятор")]
+        Emulator
     }
 }

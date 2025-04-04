@@ -140,6 +140,9 @@ namespace TranslateRESX.Core.Controller
                         case LanguageService.Google:
                             translator = new GoogleTranslator(parameters.ApiKey, targetLanguage);
                             break;
+                        case LanguageService.DeepL:
+                            translator = new DeepLTranslator(parameters.ApiKey, targetLanguage);
+                            break;
                         default:
                             translator = new Emulator(parameters.ApiKey, targetLanguage);
                             break;
