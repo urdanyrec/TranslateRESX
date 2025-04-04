@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TranslateRESX.Core.Events;
+using TranslateRESX.Core.Helpers;
 using TranslateRESX.DB;
 using TranslateRESX.Domain.Models;
 
@@ -9,10 +10,8 @@ namespace TranslateRESX.Core.Controller
 {
     public interface IController
     {
-        CancellationTokenSource CancellationTokenSource { get; set; }
-
         event EventHandler<StateChangedEventArgs> StateChanged;
 
-        Task Start(IParametersModel parameters, IContainer dbContainer);      
+        Task<ControllerTaskResult> Start(IParametersModel parameters, IContainer dbContainer, CancellationToken cancellationToken);      
     }
 }

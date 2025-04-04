@@ -16,6 +16,6 @@ namespace TranslateRESX.Core.Helpers
 
         public string Answer { get; set; }
 
-        public string TranslatedPhrase { get; set; }
+        public string TranslatedText { get; set; }
     }
 }

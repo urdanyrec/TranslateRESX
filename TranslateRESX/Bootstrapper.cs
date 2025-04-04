@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using TranslateRESX.ApiHistory;
 using TranslateRESX.Core.Controller;
 using TranslateRESX.DB;
+using TranslateRESX.Dialog;
 using TranslateRESX.Domain.Models;
 using TranslateRESX.Helpers;
 using TranslateRESX.Main;
@@ -36,6 +37,7 @@ namespace TranslateRESX
             _container.Singleton<ITranslateStateView, TranslateStateViewModel>();
             _container.Singleton<IMainView, MainViewModel>();
             _container.Singleton<IApiHistoryView, ApiHistoryViewModel>();
+            _container.PerRequest<IDialogView, DialogViewModel>();
 
             var config = new VisualConfig();
             _container.RegisterInstance(typeof(IVisualConfig), "Config", config);

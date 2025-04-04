@@ -9,5 +9,8 @@ namespace TranslateRESX.Domain.Enums
 
         [Description("Эмулятор")]
         Emulator,
+
+        [Description("Google")]
+        Google,
     }
 }

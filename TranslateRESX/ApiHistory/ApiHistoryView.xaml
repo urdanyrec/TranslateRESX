@@ -10,6 +10,7 @@
         Title="История API ключей"
         Height="160" 
         Width="410"
+        Icon="/Resources/Images/icon.ico"
         cal:Bind.AtDesignTime="True"
         cal:Message.Attach="[Event Loaded]=[Action LoadedCommand($view)];"
         d:DataContext="{d:DesignInstance Type=local:ApiHistoryViewModel, IsDesignTimeCreatable=True}" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">

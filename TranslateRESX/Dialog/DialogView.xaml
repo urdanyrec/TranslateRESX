@@ -1,0 +1,80 @@
+﻿<Window x:Class="TranslateRESX.Dialog.DialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TranslateRESX.Dialog"
+        mc:Ignorable="d"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:converters="clr-namespace:TranslateRESX.Converters"
+        Width="500"
+        Height="200"
+        Icon="/Resources/Images/icon.ico"
+        cal:Bind.AtDesignTime="True"
+        d:DataContext="{d:DesignInstance Type=local:DialogViewModel, IsDesignTimeCreatable=True}"
+        ResizeMode="NoResize" 
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:BoldTextMultiConverter x:Key="BoldTextMultiConverter" />
+            <converters:BoolToImageConverter x:Key="BoolToImageConverter">
+                <converters:BoolToImageConverter.TrueImage>
+                    <BitmapImage UriSource="pack://application:,,,/Resources/Images/error.png" />
+                </converters:BoolToImageConverter.TrueImage>
+                <converters:BoolToImageConverter.FalseImage>
+                    <BitmapImage UriSource="pack://application:,,,/Resources/Images/information.png" />
+                </converters:BoolToImageConverter.FalseImage>
+            </converters:BoolToImageConverter>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid 
+            Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Image
+                Width="32"
+                Height="32"
+                Margin="14,0,14,0"
+                Source="{Binding Error, Converter={StaticResource BoolToImageConverter}}"
+                Stretch="Fill" />
+            <TextBlock
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                FontSize="14"
+                TextWrapping="Wrap">
+            <ContentControl>
+                <ContentControl.Content>
+                    <MultiBinding Converter="{StaticResource BoldTextMultiConverter}">
+                        <Binding Path="Message" />
+                        <Binding Path="BoldMessage" />
+                    </MultiBinding> 
+                </ContentControl.Content>
+            </ContentControl>
+            </TextBlock>
+        </Grid>
+        <Grid 
+            Grid.Row="1" 
+            Background="#F0F0F0">
+            <StackPanel
+                Margin="0,8,8,8"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <Button 
+                    IsDefault="True"
+                    Width="80"
+                    Height="30"
+                    cal:Message.Attach="[Event Click] = [Action OkCommand($view)]"
+                    Content="Ок">
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

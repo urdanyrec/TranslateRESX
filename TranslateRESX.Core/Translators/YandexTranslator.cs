@@ -16,14 +16,14 @@ namespace TranslateRESX.Core.Translators
     {
         public string ApiKey { get; }
 
-        public string DestinationLanguage { get; }
+        public string TargetLanguageCode { get; }
 
         private readonly HttpClient _httpClient;
 
         public YandexTranslator(string apiKey, string targetLanguage)
         {
             ApiKey = apiKey;
-            DestinationLanguage = targetLanguage;
+            TargetLanguageCode = targetLanguage;
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(30);
         }
@@ -37,7 +37,7 @@ namespace TranslateRESX.Core.Translators
             var requestData = new
             {
                 sourceLanguageCode = sourceLanguage,
-                targetLanguageCode = DestinationLanguage,
+                targetLanguageCode = TargetLanguageCode,
                 texts = new[] { text },
                 folderId = ""
             };
@@ -65,7 +65,7 @@ namespace TranslateRESX.Core.Translators
                                                     .GetString();
       
                 taskResult.Answer = responseJson;
-                taskResult.TranslatedPhrase = translatedText;
+                taskResult.TranslatedText = translatedText;
             }
             
             return taskResult;

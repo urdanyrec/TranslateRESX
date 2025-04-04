@@ -7,7 +7,7 @@ namespace TranslateRESX.Core.Translators
     {
         string ApiKey { get; }
 
-        string DestinationLanguage { get; }
+        string TargetLanguageCode { get; }
 
         Task<TranslateTaskResult> TranslateTextAsync(string text, string sourceLanguage);
     }

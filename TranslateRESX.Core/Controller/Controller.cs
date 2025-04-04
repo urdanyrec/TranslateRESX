@@ -14,30 +14,29 @@ using System.Resources;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using TranslateRESX.Core.Events;
+using System.Xml.Linq;
 
 namespace TranslateRESX.Core.Controller
 {
     public class Controller : IController
     {
-        public CancellationTokenSource CancellationTokenSource { get; set; }
-
         public event EventHandler<StateChangedEventArgs> StateChanged;
 
         private string _pathToBackup;
 
         public Controller(string pathToBackup)
         {
-            CancellationTokenSource = new CancellationTokenSource();
             _pathToBackup = pathToBackup;
         }
 
-        public Task Start(IParametersModel parameters, IContainer dbContainer)
+        public Task<ControllerTaskResult> Start(IParametersModel parameters, IContainer dbContainer, CancellationToken cancellationToken)
         {
             if (parameters == null)
                 throw new NullReferenceException();
 
-            return Task.Factory.StartNew(() => 
+            return Task<ControllerTaskResult>.Factory.StartNew(() => 
             {
+                ControllerTaskResult controllerTaskResult = new ControllerTaskResult();
                 var state = new StateModel();
                 state.State = StateType.NotRunning;
                 OnStateChanged(state);
@@ -50,61 +49,78 @@ namespace TranslateRESX.Core.Controller
                 if (targetFileExists)
                     File.Copy(parameters.TargetFilename, Path.Combine(backupPath, Path.GetFileName(parameters.TargetFilename)));
 
-                // Словарь для хранения существующих переводов (если файл есть)
-                var existingResources = new Dictionary<string, object>();
-                if (targetFileExists)
+                // Восстановление бекапа при ошибке
+                Action<bool> recoverBackup = (fileExists) =>
                 {
-                    try
-                    {
-                        using (ResXResourceReader reader = new ResXResourceReader(parameters.TargetFilename))
-                        {
-                            reader.UseResXDataNodes = true;
-                            foreach (DictionaryEntry entry in reader)
-                            {
-                                if (entry.Value is string value)
-                                {
-                                    existingResources[entry.Key.ToString()] = value;
-                                }
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        File.Delete(parameters.TargetFilename);
-                        targetFileExists = false;
-                    }
-                }
+                    if (!fileExists)
+                        return;
 
-                // Ключи для перевода
-                var resourcesToTranslate = new List<ResXDataNode>();
-                var otherResources = new List<ResXDataNode>();
-                using (ResXResourceReader reader = new ResXResourceReader(parameters.SourceFilename))
-                {
-                    reader.UseResXDataNodes = true;
-                    foreach (DictionaryEntry entry in reader)
-                    {
-                        var node = (ResXDataNode)entry.Value;
-                        if (node.GetValue((ITypeResolutionService)null) is string text)
-                        {
-                            if (!targetFileExists || !existingResources.ContainsKey(node.Name))
-                            {
-                                resourcesToTranslate.Add(node);
-                            }
-                        }
-                        else if (!existingResources.ContainsKey(node.Name))
-                        {
-                            otherResources.Add(node);
-                        }
-                    }
-                }
+                    File.Delete(parameters.TargetFilename);
+                    File.Copy(Path.Combine(backupPath, Path.GetFileName(parameters.TargetFilename)), parameters.TargetFilename);
+                };
 
                 try
                 {
-                    if (CancellationTokenSource.Token.IsCancellationRequested)
-                        CancellationTokenSource.Token.ThrowIfCancellationRequested();
+                    // Словарь для хранения существующих переводов (если файл есть)
+                    var existingResources = new Dictionary<string, object>();
+                    var otherResources = new List<ResXDataNode>();
+                    if (targetFileExists)
+                    {
+                        try
+                        {
+                            using (ResXResourceReader reader = new ResXResourceReader(parameters.TargetFilename))
+                            {
+                                reader.UseResXDataNodes = true;
+                                foreach (DictionaryEntry entry in reader)
+                                {
+                                    var node = (ResXDataNode)entry.Value;
+                                    if (node.GetValue((ITypeResolutionService)null) is string text)
+                                    {
+                                        existingResources.Add(entry.Key.ToString(), text);
+                                    }
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            throw new InvalidOperationException("Не удалось прочитать существующий выходной файл ресурсов.");
+                        }
+                    }
+
+                    // Ключи для перевода
+                    var resourcesToTranslate = new List<ResXDataNode>();
+                    using (ResXResourceReader reader = new ResXResourceReader(parameters.SourceFilename))
+                    {
+                        reader.UseResXDataNodes = true;
+                        foreach (DictionaryEntry entry in reader)
+                        {
+                            var node = (ResXDataNode)entry.Value;
+                            try
+                            {
+                                if (node.GetValue((ITypeResolutionService)null) is string text)
+                                {
+                                    if (!targetFileExists || !existingResources.ContainsKey(node.Name))
+                                    {
+                                        resourcesToTranslate.Add(node);
+                                    }
+                                }
+                                else if (!existingResources.ContainsKey(node.Name))
+                                {
+                                    otherResources.Add(node);
+                                }
+                            }
+                            catch
+                            {
+                                otherResources.Add(node);
+                            }
+                        }
+                    }
 
                     if (resourcesToTranslate.Count == 0)
-                        throw new Exception("Отсутствуют уникальный ключи в файле ресурсов");
+                        throw new InvalidOperationException("Отсутствуют уникальные ключи в файле ресурсов");
+
+                    controllerTaskResult.AllCount = resourcesToTranslate.Count;
+                    controllerTaskResult.TargetFileExists = targetFileExists;
 
                     state.State = StateType.Processing;
                     state.Log = "";
@@ -120,6 +136,9 @@ namespace TranslateRESX.Core.Controller
                     {
                         case LanguageService.Yandex:
                             translator = new YandexTranslator(parameters.ApiKey, targetLanguage);
+                            break;
+                        case LanguageService.Google:
+                            translator = new GoogleTranslator(parameters.ApiKey, targetLanguage);
                             break;
                         default:
                             translator = new Emulator(parameters.ApiKey, targetLanguage);
@@ -138,30 +157,34 @@ namespace TranslateRESX.Core.Controller
                             writer.AddResource(resource);
                         }
 
-
                         // Добавляем новые переводы
                         for (int i = 0; i < resourcesToTranslate.Count; i++)
                         {
-                            if (CancellationTokenSource.Token.IsCancellationRequested)
-                                CancellationTokenSource.Token.ThrowIfCancellationRequested();
+                            // Проверка отмены
+                            if (cancellationToken.IsCancellationRequested)
+                                cancellationToken.ThrowIfCancellationRequested();
 
                             string text = resourcesToTranslate[i].GetValue((ITypeResolutionService)null) as string;
                             string translatedText = "";
                             Task<TranslateTaskResult> result = translator.TranslateTextAsync(text, sourceLanguage);
-                            result.Wait();
-                            if (result.Result.StatusCode == 200)
+                            bool success = result.Wait(30000);
+                            if (success && result.Result.StatusCode == 200)
                             {
-                                translatedText = result.Result.TranslatedPhrase;
+                                translatedText = result.Result.TranslatedText;
                                 var newNode = new ResXDataNode(resourcesToTranslate[i].Name, translatedText);
                                 writer.AddResource(newNode);
                             }
 
                             // Обновление лога
-                            state.Log += $"{DateTime.Now}. Время ожидания: {result.Result.WaitTime} мс. Статус: {result.Result.StatusCode}. Перевод: {sourceLanguage}-{targetLanguage}. Результат: {result.Result.TranslatedPhrase}" + "\n";
-                            state.CurrentIndex = i;
+                            state.CurrentIndex = i + 1;
                             state.Progress = 100.0 * (double)state.CurrentIndex / state.AllCount;
+                            state.Log += $"{DateTime.Now}. " +
+                                         $"Время ожидания: {result.Result.WaitTime} мс. " +
+                                         $"Статус: {result.Result.StatusCode}." +
+                                         $" Перевод: {sourceLanguage}-{targetLanguage}. " +
+                                         $"Результат: {result.Result.TranslatedText}" + "\n";
                             OnStateChanged(state);
-                            Debug.WriteLine(state.Progress);
+
                             // Сохранение в БД
                             var dataEntity = new Data
                             {
@@ -180,22 +203,42 @@ namespace TranslateRESX.Core.Controller
                             };
                             dbContainer.Results.Add(dataEntity);
                             dbContainer.Complete();
+
+                            controllerTaskResult.CompleteCount = i + 1;
                         }
                     }
+
+                    controllerTaskResult.Success = true;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex)
                 {
                     state.State = StateType.Canceled;
                     OnStateChanged(state);
-                    throw;
+                    recoverBackup(targetFileExists);
+                    controllerTaskResult.TargetFileRecovered = true;
+                    controllerTaskResult.Success = false;
+                    controllerTaskResult.Error = ex;
+                }
+                catch(InvalidOperationException ex)
+                {
+                    state.State = StateType.Error;
+                    OnStateChanged(state);
+                    controllerTaskResult.Success = false;
+                    controllerTaskResult.Error = ex;
                 }
                 catch (Exception ex)
                 {
                     state.State = StateType.Error;
                     OnStateChanged(state);
-                    throw ex;
+                    recoverBackup(targetFileExists);
+                    controllerTaskResult.TargetFileRecovered = true;
+                    controllerTaskResult.Success = false;
+                    controllerTaskResult.Error = ex;
                 }
-            }, CancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+                return controllerTaskResult;
+
+            }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         protected virtual void OnStateChanged(IState state)

@@ -1,6 +1,5 @@
 ﻿using Caliburn.Micro;
 using System.Dynamic;
-using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Windows;
 using System;
@@ -10,18 +9,20 @@ using TranslateRESX.TranslateParameters;
 using TranslateRESX.TranslateState;
 using TranslateRESX.Core.Controller;
 using TranslateRESX.DB;
-using System.Data;
 using TranslateRESX.Core.Events;
-
+using TranslateRESX.Dialog;
 namespace TranslateRESX.Main
 {
     public class MainViewModel : PropertyChangedBase, IMainView
     {
         private readonly IWindowManager _windowManager;
 
+        private CancellationTokenSource _cancellationTokenSource;
+
         public MainViewModel(IWindowManager windowManager)
         {
             _windowManager = windowManager;
+            _cancellationTokenSource = new CancellationTokenSource();
         }
 
         public ITranslateParametersView TranslateParametersView => IoC.Get<ITranslateParametersView>();
@@ -50,23 +51,61 @@ namespace TranslateRESX.Main
             {
                 TranslationStarted = true;
 
-                Controller.CancellationTokenSource = new CancellationTokenSource();
+                _cancellationTokenSource = new CancellationTokenSource();
                 Controller.StateChanged += ControllerStateChanged;
-                await Controller.Start(TranslateParametersView, Container);     
-            }
-            catch (OperationCanceledException ex)
-            {
-                var a = ex;
-            }
-            catch (Exception ex)
-            {
-                var a = ex;
+
+                var result = await Controller.Start(TranslateParametersView, Container, _cancellationTokenSource.Token);
+                if (result.Success)
+                {
+                    dynamic settings = new ExpandoObject();
+                    var dialog = IoC.Get<IDialogView>();
+                    dialog.Title = "Информация";
+                    dialog.Message = $"Перевод выполнен успешно. \n";
+                    dialog.BoldMessage = result.CompleteCount.ToString();
+                    if (result.TargetFileExists)
+                        dialog.Message += $"К файлу ресурсов добавлено {result.CompleteCount} строк.";
+                    else
+                        dialog.Message += $"Переведено {result.CompleteCount} строк.";
+
+                    _windowManager.ShowDialog(dialog, settings: settings);
+                }
+                else
+                {
+                    dynamic settings = new ExpandoObject();
+                    var dialog = IoC.Get<IDialogView>();
+                    dialog.Title = "Ошибка";
+                    dialog.Message = $"Произошла ошибка во время перевода. \n";
+                    dialog.Error = true;
+                    if (result.TargetFileRecovered)
+                        dialog.Message += $"Выходной файл ресурсов был восстановлен по умолчанию.\n";
+                    switch (result.Error)
+                    {
+                        case OperationCanceledException canceledException:
+                            dialog.Message += $"Перевод был отменен.";
+                            break;
+
+                        case InvalidOperationException invalidException:
+                            dialog.Message += invalidException.Message;
+                            break;
+
+                        case Exception exception:
+                            dialog.Message += exception.Message;
+                            break;
+                    }
+
+                    _windowManager.ShowDialog(dialog, settings: settings);
+                }
             }
             finally
             {
                 Controller.StateChanged -= ControllerStateChanged;
                 TranslationStarted = false;
             }
+        }
+
+        public void StopCommand()
+        {
+            _cancellationTokenSource?.Cancel();
         }
 
         public void LoadedCommand()

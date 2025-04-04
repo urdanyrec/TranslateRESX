@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using TranslateRESX.Core.Helpers;
 
 namespace TranslateRESX.Core.Translators
@@ -18,12 +10,12 @@ namespace TranslateRESX.Core.Translators
     {
         public string ApiKey { get; }
 
-        public string DestinationLanguage { get; }
+        public string TargetLanguageCode { get; }
 
         public Emulator(string apiKey, string targetLanguage)
         {
             ApiKey = apiKey;
-            DestinationLanguage = targetLanguage;
+            TargetLanguageCode = targetLanguage;
         }
 
         public async Task<TranslateTaskResult> TranslateTextAsync(string text, string sourceLanguage)
@@ -31,7 +23,7 @@ namespace TranslateRESX.Core.Translators
             TranslateTaskResult taskResult = new TranslateTaskResult();
             taskResult.StatusCode = 200;
             taskResult.WaitTime = 0;
-            taskResult.Answer = text;
+            taskResult.TranslatedText = "text";
             return taskResult;
         }
     }

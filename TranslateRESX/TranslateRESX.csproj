@@ -119,8 +119,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Converters\BoldTextMultiConverter.cs" />
+    <Compile Include="Converters\BoolToImageConverter.cs" />
+    <Compile Include="Converters\InverseBoolConverter.cs" />
     <Compile Include="Converters\ConcatPropertyConverter.cs" />
     <Compile Include="Converters\StringToApiModelConverter.cs" />
+    <Compile Include="Dialog\IDialogView.cs" />
+    <Compile Include="Dialog\DialogViewModel.cs" />
+    <Compile Include="Dialog\DialogView.xaml.cs">
+      <DependentUpon>DialogView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\CustomWindowManager.cs" />
     <Compile Include="Converters\EnumToDescriptionConverter.cs" />
     <Compile Include="Main\IMainView.cs" />
@@ -171,6 +179,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Dialog\DialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Main\MainView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -197,6 +209,15 @@
       <Project>{75146ed9-3979-48cc-b3d4-18061b030699}</Project>
       <Name>TranslateRESX.Domain</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\information.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\error.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

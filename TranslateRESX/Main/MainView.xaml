@@ -7,14 +7,22 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:domain="clr-namespace:TranslateRESX.Domain.Enums;assembly=TranslateRESX.Domain"
         xmlns:cal="http://www.caliburnproject.org"
+        xmlns:converters="clr-namespace:TranslateRESX.Converters"
         mc:Ignorable="d"
-        Title="Переводчик ресурсов" 
-        Height="600" 
+        Title="Переводчик ресурсов"
+        Icon="/Resources/Images/icon.ico"
+        Height="650" 
         Width="1000"
         cal:Bind.AtDesignTime="True"
         cal:Message.Attach="[Event Loaded]=[Action LoadedCommand()];[Event Closed]=[Action ClosedCommand()]"
         d:DataContext="{d:DesignInstance Type=local:MainViewModel, IsDesignTimeCreatable=True}" 
-        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen">
+        ResizeMode="CanMinimize" 
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -34,13 +42,27 @@
         <Grid 
             Background="#F0F0F0"
             Grid.Row="2">
-            <Button             
-                Height="30"
-                Width="100"
-                Content="Старт"
-                HorizontalAlignment="Right"
-                Margin="5"
-                cal:Message.Attach="[Event Click]=[Action StartCommand()]"/>
+            <StackPanel
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+                <Button             
+                    Height="30"
+                    Width="100"
+                    Content="Стоп"
+                    IsEnabled="{Binding TranslationStarted}"
+                    HorizontalAlignment="Right"
+                    Margin="10"
+                    cal:Message.Attach="[Event Click]=[Action StopCommand()]"/>
+                <Button             
+                    Height="30"
+                    Width="100"
+                    Content="Старт"
+                    HorizontalAlignment="Right"
+                    IsEnabled="{Binding TranslationStarted, Converter={StaticResource InverseBoolConverter}}"
+                    Margin="10"
+                    cal:Message.Attach="[Event Click]=[Action StartCommand()]"/>
+            </StackPanel>
+            
         </Grid>
     </Grid>
     
