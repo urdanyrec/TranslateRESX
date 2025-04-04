@@ -62,11 +62,14 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <Button
-                Width="30"
-                Height="22"
-                Margin="5"
-                Content=". . ."
-                cal:Message.Attach="[Event Click]=[Action OpenApiHistoryCommand()]"/>
+                Width="29"
+                Height="29"
+                Margin="5,0,0,0"
+                cal:Message.Attach="[Event Click]=[Action OpenApiHistoryCommand()]">
+                <StackPanel>
+                    <Image Source="/Resources/Images/find.png"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
         <Grid
             Grid.Row="1">
