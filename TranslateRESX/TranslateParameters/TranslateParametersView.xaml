@@ -135,6 +135,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition  Width="Auto"/>
@@ -172,8 +173,14 @@
                     Height="22"
                     Margin="0,0,5,0"
                     cal:Message.Attach="[Event Click]=[Action SelectDirectoryCommand()]">
-                    
                 </Button>
+                <CheckBox
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    Grid.ColumnSpan="3"
+                    Margin="5"
+                    Content="Перезаписать все ключи (для уже существующего ресурса)"
+                    IsChecked="{Binding RewriteAllKeys}"/>
             </Grid>
             <StackPanel
                 Margin="5"

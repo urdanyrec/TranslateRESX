@@ -33,5 +33,10 @@ namespace TranslateRESX.Domain.Models
         /// Язык перевлда
         /// </summary>
         LanguageType TargetLanguage { get; set; }
+
+        /// <summary>
+        /// Перезаписать все ключи (для уже существующего автосгенерированного файла ресурсов)
+        /// </summary>
+        bool RewriteAllKeys { get; set; }
     }
 }

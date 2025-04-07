@@ -22,6 +22,8 @@ namespace TranslateRESX.Domain.Models
 
         public LanguageType TargetLanguage { get; set; } = LanguageType.English;
 
+        public bool RewriteAllKeys { get; set; }
+
         [JsonIgnore]
         public string DataPath { get; set; }
 

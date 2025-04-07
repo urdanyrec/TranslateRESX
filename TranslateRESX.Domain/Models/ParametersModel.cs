@@ -15,5 +15,7 @@ namespace TranslateRESX.Domain.Models
         public LanguageType SourceLanguage { get; set; }
 
         public LanguageType TargetLanguage { get; set; }
+
+        public bool RewriteAllKeys { get; set; }
     }
 }

@@ -140,6 +140,17 @@ namespace TranslateRESX.TranslateParameters
             }
         }
 
+        private bool _rewriteAllKeys;
+        public bool RewriteAllKeys 
+        {
+            get => _rewriteAllKeys;
+            set
+            {
+                _rewriteAllKeys = value;
+                NotifyOfPropertyChange();
+            }
+        }
+
         public void LoadSourceFileCommand()
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog();

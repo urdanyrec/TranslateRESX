@@ -64,7 +64,7 @@ namespace TranslateRESX.Core.Controller
                     // Словарь для хранения существующих переводов (если файл есть)
                     var existingResources = new Dictionary<string, object>();
                     var otherResources = new List<ResXDataNode>();
-                    if (targetFileExists)
+                    if (targetFileExists && !parameters.RewriteAllKeys)
                     {
                         try
                         {
