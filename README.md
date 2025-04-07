@@ -4,9 +4,6 @@
 
 The project is a program that translates resource files with the .resx extension into another language.
 
-## Project Description
-
-The project is a program that translates resource files with the .resx extension into another language.
 
 ## Downloads
 
