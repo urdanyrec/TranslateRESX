@@ -2,6 +2,7 @@
 using System.Data.SQLite;
 using System.IO;
 using System.Reflection;
+using TranslateRESX.Db.Repository;
 using TranslateRESX.DB.Repository;
 
 namespace TranslateRESX.DB
@@ -14,6 +15,8 @@ namespace TranslateRESX.DB
 
         public IDataRepository Results { get; set; }
 
+        public ILanguageRepository Languages { get; set; }
+
         public string DatabaseDirectory { get; private set; }
 
         public Container()
@@ -22,6 +25,7 @@ namespace TranslateRESX.DB
             _context = new MainDbContext(sqLiteConnection);
             Versions = new VersionRepository(_context);
             Results = new DataRepository(_context);
+            Languages = new LanguageRepository(_context);
 
             MainDbMigrations.Migration(this, _context);
         }

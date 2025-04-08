@@ -8,13 +8,6 @@ namespace TranslateRESX.Core.Helpers
 {
     public static class ResourceExtentions
     {
-        public static Dictionary<LanguageType, (string, string)> LanguageDictionary { get; } = new Dictionary<LanguageType, (string, string)>
-        {
-            { LanguageType.Russian, ("ru-RU", "ru") },
-            { LanguageType.English, ("en-US", "en") },
-            { LanguageType.French,  ("fr-FR", "fr") },
-            { LanguageType.Spanish, ("es-ES", "es") }
-        };
 
         /// <summary>
         /// Формирует путь к файлу с нужным языковым кодом в расширении

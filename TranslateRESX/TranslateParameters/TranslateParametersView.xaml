@@ -23,14 +23,6 @@
                     <x:Type TypeName="domain:LanguageService" />
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
-            <ObjectDataProvider
-                x:Key="Languages"
-                MethodName="GetValues"
-                ObjectType="{x:Type sys:Enum}">
-                <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="domain:LanguageType" />
-                </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
@@ -119,14 +111,10 @@
                 <ComboBox
                     Height="Auto"
                     Margin="5"
-                    Width="100"
-                    ItemsSource="{Binding Source={StaticResource Languages}}"
-                    SelectedItem="{Binding SourceLanguage}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource EnumToDescriptionConverter}}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
+                    Width="120"
+                    ItemsSource="{Binding Languages}"
+                    SelectedItem="{Binding SourceLanguage}"
+                    DisplayMemberPath="LanguageName">
                 </ComboBox>
             </StackPanel>
             <Grid
@@ -195,14 +183,10 @@
                 <ComboBox
                     Height="Auto"
                     Margin="5"
-                    Width="100"
-                    ItemsSource="{Binding Source={StaticResource Languages}}"
-                    SelectedItem="{Binding TargetLanguage}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource EnumToDescriptionConverter}}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
+                    Width="120"
+                    ItemsSource="{Binding Languages}"
+                    SelectedItem="{Binding TargetLanguage}"
+                    DisplayMemberPath="LanguageName">
                 </ComboBox>
             </StackPanel>
         </Grid>

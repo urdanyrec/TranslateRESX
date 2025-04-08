@@ -127,8 +127,8 @@ namespace TranslateRESX.Core.Controller
                     state.AllCount = resourcesToTranslate.Count;
                     OnStateChanged(state);
 
-                    string sourceLanguage = ResourceExtentions.LanguageDictionary[parameters.SourceLanguage].Item2;
-                    string targetLanguage = ResourceExtentions.LanguageDictionary[parameters.TargetLanguage].Item2;
+                    string sourceLanguage = parameters.SourceLanguage.LanguageCode;
+                    string targetLanguage = parameters.TargetLanguage.LanguageCode;
 
                     // Выбор сервиса для перевода
                     ITranslator translator = null;

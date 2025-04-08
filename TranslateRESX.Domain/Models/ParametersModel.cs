@@ -12,9 +12,9 @@ namespace TranslateRESX.Domain.Models
 
         public string TargetFilename { get; set; }
 
-        public LanguageType SourceLanguage { get; set; }
+        public LanguageModel SourceLanguage { get; set; }
 
-        public LanguageType TargetLanguage { get; set; }
+        public LanguageModel TargetLanguage { get; set; }
 
         public bool RewriteAllKeys { get; set; }
     }

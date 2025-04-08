@@ -32,7 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-<DebugType>pdbonly</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -48,6 +48,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper, Version=5.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.5.1.1\lib\net45\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -62,13 +65,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums\LanguageService.cs" />
-    <Compile Include="Enums\LanguageType.cs" />
     <Compile Include="Enums\StateType.cs" />
     <Compile Include="Models\ApiKeyModel.cs" />
+    <Compile Include="Models\ILanguageModel.cs" />
     <Compile Include="Models\IConfig.cs" />
     <Compile Include="Models\IParametersModel.cs" />
     <Compile Include="Models\IVisualConfig.cs" />
     <Compile Include="Models\IState.cs" />
+    <Compile Include="Models\LanguageModel.cs" />
     <Compile Include="Models\ParametersModel.cs" />
     <Compile Include="Models\StateModel.cs" />
     <Compile Include="Models\VisualConfig.cs" />

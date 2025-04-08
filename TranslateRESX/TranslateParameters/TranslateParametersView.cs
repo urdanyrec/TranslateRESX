@@ -9,5 +9,6 @@ namespace TranslateRESX.TranslateParameters
 {
     public interface ITranslateParametersView : IParametersModel
     {
+        void LoadConfig(IVisualConfig config);
     }
 }

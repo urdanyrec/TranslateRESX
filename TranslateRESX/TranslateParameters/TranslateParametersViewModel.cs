@@ -1,23 +1,38 @@
-﻿using Caliburn.Micro;
+﻿using AutoMapper;
+using Caliburn.Micro;
 using Microsoft.Win32;
 using System;
+using System.Collections.ObjectModel;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using TranslateRESX.ApiHistory;
 using TranslateRESX.Core.Helpers;
+using TranslateRESX.Db.Entity;
+using TranslateRESX.DB;
 using TranslateRESX.Domain.Enums;
+using TranslateRESX.Domain.Models;
 
 namespace TranslateRESX.TranslateParameters
 {
-    public class TranslateParametersViewModel : PropertyChangedBase, ITranslateParametersView
+    public class TranslateParametersViewModel : PropertyChangedBase, ITranslateParametersView, IHandle<string>
     {
+        private readonly IMapper _mapper;
         private readonly IWindowManager _windowManager;
 
-        public TranslateParametersViewModel(IWindowManager windowManager)
+        private IContainer _container => IoC.Get<IContainer>();
+
+        public TranslateParametersViewModel(IWindowManager windowManager, IEventAggregator events)
         {
             _windowManager = windowManager;
+            events.Subscribe(this);
+            var mapperConfiguration = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Language, LanguageModel>();
+            });
+            _mapper = mapperConfiguration.CreateMapper();
+            UpdateLanguages();
         }
 
         private LanguageService _service;
@@ -108,19 +123,35 @@ namespace TranslateRESX.TranslateParameters
             }
         }
 
-        private LanguageType _sourceLanguage = LanguageType.Russian;
-        public LanguageType SourceLanguage
+        private ObservableCollection<LanguageModel> _languages = new ObservableCollection<LanguageModel>();
+        public ObservableCollection<LanguageModel> Languages
+        {
+            get => _languages;
+            set
+            {
+                _languages = value;
+                NotifyOfPropertyChange();
+            }
+        }
+
+        private string _sourceLanguageName;
+        private LanguageModel _sourceLanguage;
+        public LanguageModel SourceLanguage
         {
             get => _sourceLanguage;
             set
             {
                 _sourceLanguage = value;
                 NotifyOfPropertyChange();
+
+                if (_sourceLanguage != null)
+                    _sourceLanguageName = _sourceLanguage.LanguageName;
             }
         }
 
-        private LanguageType _targetLanguage = LanguageType.English;
-        public LanguageType TargetLanguage
+        private string _targetLanguageName;
+        private LanguageModel _targetLanguage;
+        public LanguageModel TargetLanguage
         {
             get => _targetLanguage;
             set
@@ -131,11 +162,13 @@ namespace TranslateRESX.TranslateParameters
                 _targetLanguage = value;
                 NotifyOfPropertyChange();
 
+                if (_targetLanguage != null)
+                    _targetLanguageName = _targetLanguage.LanguageName;
+
                 if (string.IsNullOrEmpty(TargetFilenameWithExtention))
                     return;
 
-                var targetLanguage = ResourceExtentions.LanguageDictionary[TargetLanguage];
-                var targetFilename = ResourceExtentions.GetFilenameWithExtention(TargetFilenameWithExtention, targetLanguage.Item1);
+                var targetFilename = ResourceExtentions.GetFilenameWithExtention(TargetFilenameWithExtention, _targetLanguage.LocalizationSuffix);
                 TargetFilenameWithExtention = Path.GetFileName(targetFilename);
             }
         }
@@ -166,16 +199,21 @@ namespace TranslateRESX.TranslateParameters
             {
                 try
                 {
-                    SourceLanguage = ResourceExtentions.LanguageDictionary.FirstOrDefault(x => x.Value.Item1.Contains(language)).Key;
+                    SourceLanguage = Languages.FirstOrDefault(x => x.LocalizationSuffix.Contains(language));
                 }
                 catch(ArgumentNullException) { }
             }
 
-            var targetLanguage = ResourceExtentions.LanguageDictionary[TargetLanguage];
-            var targetFilename = ResourceExtentions.GetFilenameWithExtention(SourceFilename, targetLanguage.Item1);
-
             TargetDirectory = Path.GetDirectoryName(filename);
-            TargetFilenameWithExtention = Path.GetFileName(targetFilename);
+            if (TargetLanguage != null)
+            {
+                var targetFilename = ResourceExtentions.GetFilenameWithExtention(SourceFilename, TargetLanguage.LocalizationSuffix);
+                TargetFilenameWithExtention = Path.GetFileName(targetFilename);
+            }
+            else
+            {
+                TargetFilenameWithExtention = ResourceExtentions.GetFilenameWithExtention(SourceFilename, "");
+            }
         }
 
         public void SelectDirectoryCommand()
@@ -212,6 +250,61 @@ namespace TranslateRESX.TranslateParameters
                 }
                 catch (ArgumentException) { }
             }
+        }
+
+        public void Handle(string message)
+        {
+            switch (message)
+            {
+                case "LanguagesUpdated":
+                    UpdateLanguages();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateLanguages()
+        {
+            Languages.Clear();
+            var languages = _container.Languages.GetAll();
+            foreach (var col in languages)
+                Languages.Add(_mapper.Map<Language, LanguageModel>(col));
+
+            if (Languages.Count > 1)
+            {
+                if (_sourceLanguageName != null)
+                {
+                    var source = Languages.FirstOrDefault(x => x.LanguageName == _sourceLanguageName);
+                    if (source != null)
+                        SourceLanguage = source;
+                    else
+                        SourceLanguage = Languages[0];
+                }
+
+                if (_targetLanguageName != null)
+                {
+                    var target = Languages.FirstOrDefault(x => x.LanguageName == _targetLanguageName);
+                    if (target != null)
+                        TargetLanguage = target;
+                    else
+                        TargetLanguage = Languages[1];
+                }
+            }
+        }
+
+        public void LoadConfig(IVisualConfig config)
+        {
+            ApiKey = config.ApiKey;
+            Service = config.Service;
+
+            var source = Languages.FirstOrDefault(x => x.LanguageName == config.SourceLanguage);
+            if (source != null)
+                SourceLanguage = source;
+
+            var target = Languages.FirstOrDefault(x => x.LanguageName == config.TargetLanguage);
+            if (target != null)
+                TargetLanguage = target;
         }
     }
 }

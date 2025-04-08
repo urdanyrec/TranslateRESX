@@ -27,12 +27,12 @@ namespace TranslateRESX.Domain.Models
         /// <summary>
         /// Исходный язык файла ресурсов
         /// </summary>
-        LanguageType SourceLanguage { get; set; }
+        LanguageModel SourceLanguage { get; set; }
 
         /// <summary>
         /// Язык перевлда
         /// </summary>
-        LanguageType TargetLanguage { get; set; }
+        LanguageModel TargetLanguage { get; set; }
 
         /// <summary>
         /// Перезаписать все ключи (для уже существующего автосгенерированного файла ресурсов)

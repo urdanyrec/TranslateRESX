@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TranslateRESX.DB
 {
     public static class MainDbMigrations
     {
-        private static readonly int _requiredDatabaseVersion = 2;
+        private static readonly int _requiredDatabaseVersion = 3;
 
         public static void Migration(Container container, MainDbContext dbContext)
         {
@@ -36,6 +33,9 @@ namespace TranslateRESX.DB
                     try
                     {
                         dbContext.Database.ExecuteSqlCommand(migration);
+
+                        if (currentVersion == 3)
+                            dbContextHelper.AddDefaultLanguages(container);
                     }
                     catch (Exception ex)
                     {

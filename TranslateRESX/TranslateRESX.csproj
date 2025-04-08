@@ -64,6 +64,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper, Version=5.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.5.1.1\lib\net45\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="Caliburn.Micro, Version=3.0.1.0, Culture=neutral, PublicKeyToken=8e5891231f2ed21f, processorArchitecture=MSIL">
       <HintPath>..\packages\Caliburn.Micro.Core.3.0.1\lib\net45\Caliburn.Micro.dll</HintPath>
     </Reference>
@@ -135,6 +138,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddLanguage\AddLanguageViewModel.cs" />
+    <Compile Include="AddLanguage\IAddLanguageView.cs" />
+    <Compile Include="AddLanguage\AddLanguageView.xaml.cs">
+      <DependentUpon>AddLanguageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ApiHistory\ApiHistoryView.xaml.cs">
       <DependentUpon>ApiHistoryView.xaml</DependentUpon>
     </Compile>
@@ -157,6 +165,11 @@
     </Compile>
     <Compile Include="Helpers\CustomWindowManager.cs" />
     <Compile Include="Converters\EnumToDescriptionConverter.cs" />
+    <Compile Include="LanguageEditing\ILanguageEditingView.cs" />
+    <Compile Include="LanguageEditing\LanguageEditingViewModel.cs" />
+    <Compile Include="LanguageEditing\LanguageEditingView.xaml.cs">
+      <DependentUpon>LanguageEditingView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Main\IMainView.cs" />
     <Compile Include="Main\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
@@ -167,6 +180,7 @@
     <Compile Include="TranslateState\TranslateStateView.xaml.cs">
       <DependentUpon>TranslateStateView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\LanguageViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TranslateParameters\TranslateParametersView.cs" />
@@ -201,11 +215,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="AddLanguage\AddLanguageView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ApiHistory\ApiHistoryView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dialog\DialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="LanguageEditing\LanguageEditingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -247,6 +269,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\find.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\add.png" />
+    <Resource Include="Resources\Images\delete.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

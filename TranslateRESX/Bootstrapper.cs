@@ -7,12 +7,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using TranslateRESX.AddLanguage;
 using TranslateRESX.ApiHistory;
 using TranslateRESX.Core.Controller;
 using TranslateRESX.DB;
 using TranslateRESX.Dialog;
 using TranslateRESX.Domain.Models;
 using TranslateRESX.Helpers;
+using TranslateRESX.LanguageEditing;
 using TranslateRESX.Main;
 using TranslateRESX.TranslateParameters;
 using TranslateRESX.TranslateState;
@@ -37,7 +39,9 @@ namespace TranslateRESX
             _container.Singleton<ITranslateStateView, TranslateStateViewModel>();
             _container.Singleton<IMainView, MainViewModel>();
             _container.Singleton<IApiHistoryView, ApiHistoryViewModel>();
+            _container.Singleton<ILanguageEditingView, LanguageEditingViewModel>();
             _container.PerRequest<IDialogView, DialogViewModel>();
+            _container.PerRequest<IAddLanguageView, AddLanguageViewModel>();
 
             var config = new VisualConfig();
             _container.RegisterInstance(typeof(IVisualConfig), "Config", config);

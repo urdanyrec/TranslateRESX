@@ -26,22 +26,38 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
+        <Menu
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top" >
+            <MenuItem 
+                Header="_Файл">
+                <MenuItem 
+                    Header="Выход"
+                    cal:Message.Attach="[Event Click]=[Action ClosedCommand()]"/>
+            </MenuItem>
+            <MenuItem Header="_Настройки">
+                <MenuItem 
+                    Header="Добавить язык"
+                    cal:Message.Attach="[Event Click]=[Action AddLanguageCommand()]"/>
+            </MenuItem>
+        </Menu>
         <ContentControl
-            Grid.Row="0"
+            Grid.Row="1"
             HorizontalContentAlignment="Stretch"    
             VerticalContentAlignment="Stretch"
             cal:View.Model="{Binding TranslateParametersView}" />
         <ContentControl
-            Grid.Row="1"
+            Grid.Row="2"
             HorizontalContentAlignment="Stretch"    
             VerticalContentAlignment="Stretch"
             cal:View.Model="{Binding TranslateStateView}" />
         <Grid 
             Background="#F0F0F0"
-            Grid.Row="2">
+            Grid.Row="3">
             <StackPanel
                 Orientation="Horizontal"
                 HorizontalAlignment="Right">

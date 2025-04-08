@@ -11,6 +11,8 @@ using TranslateRESX.Core.Controller;
 using TranslateRESX.DB;
 using TranslateRESX.Core.Events;
 using TranslateRESX.Dialog;
+using TranslateRESX.AddLanguage;
+using TranslateRESX.LanguageEditing;
 namespace TranslateRESX.Main
 {
     public class MainViewModel : PropertyChangedBase, IMainView
@@ -113,10 +115,7 @@ namespace TranslateRESX.Main
             try
             {
                 var visualConfig = IoC.Get<IVisualConfig>();
-                TranslateParametersView.ApiKey = visualConfig.ApiKey;
-                TranslateParametersView.Service = visualConfig.Service;
-                TranslateParametersView.SourceLanguage = visualConfig.SourceLanguage;
-                TranslateParametersView.TargetLanguage = visualConfig.TargetLanguage;
+                TranslateParametersView.LoadConfig(visualConfig);
             }
             catch { }
         }
@@ -128,8 +127,8 @@ namespace TranslateRESX.Main
                 var visualConfig = IoC.Get<IVisualConfig>();
                 visualConfig.ApiKey = TranslateParametersView.ApiKey;
                 visualConfig.Service = TranslateParametersView.Service;
-                visualConfig.SourceLanguage = TranslateParametersView.SourceLanguage;
-                visualConfig.TargetLanguage = TranslateParametersView.TargetLanguage;
+                visualConfig.SourceLanguage = TranslateParametersView.SourceLanguage?.LanguageName;
+                visualConfig.TargetLanguage = TranslateParametersView.TargetLanguage?.LanguageName;
             }
             finally
             {
@@ -139,6 +138,13 @@ namespace TranslateRESX.Main
                 }
                 catch (Exception) { }
             }
+        }
+
+        public void AddLanguageCommand()
+        {
+            dynamic settings = new ExpandoObject();
+            var dialog = IoC.Get<ILanguageEditingView>();
+            _windowManager.ShowDialog(dialog, settings: settings);
         }
 
         private void ControllerStateChanged(object sender, StateChangedEventArgs e)
